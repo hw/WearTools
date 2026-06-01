@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -26,9 +25,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleEventObserver
-import androidx.lifecycle.LifecycleOwner
 import androidx.wear.compose.material3.MaterialTheme
 import androidx.wear.compose.material3.Text
 import androidx.wear.compose.ui.tooling.preview.WearPreviewDevices
@@ -59,30 +55,16 @@ fun CompassScreen(
     val trueNorthProvider = remember(context, permissionRefresh) { TrueNorthProvider(context) }
 
     if (isActive) {
-        DisposableEffect(context, permissionRefresh, trueNorthEnabled) {
-            val controller =
+        val controller =
+            remember(context, permissionRefresh, trueNorthEnabled) {
                 CompassSensorController(
                     context = context,
                     locationData = trueNorthProvider::locationData,
                     trueNorthEnabled = { trueNorthEnabled },
                     onReading = { reading = it },
                 )
-            val lifecycle = (context as LifecycleOwner).lifecycle
-            val observer =
-                LifecycleEventObserver { _, event ->
-                    when (event) {
-                        Lifecycle.Event.ON_START -> controller.start()
-                        Lifecycle.Event.ON_STOP -> controller.stop()
-                        else -> Unit
-                    }
-                }
-            lifecycle.addObserver(observer)
-            if (lifecycle.currentState.isAtLeast(Lifecycle.State.STARTED)) controller.start()
-            onDispose {
-                lifecycle.removeObserver(observer)
-                controller.stop()
             }
-        }
+        SensorLifecycleEffect(controller, onStart = controller::start, onStop = controller::stop)
     }
 
     CompassFace(
@@ -162,13 +144,6 @@ private fun CompassFace(
                         style = MaterialTheme.typography.labelSmall,
                     )
                 }
-/*
-                Text(
-                    text = if (reading.lowAccuracy) "LOW ACCURACY" else "",
-                    color = CompassMutedText,
-                    style = MaterialTheme.typography.labelSmall,
-                )
- */
             }
         } else {
             Text(
@@ -322,7 +297,6 @@ private fun androidx.compose.ui.graphics.drawscope.DrawScope.drawNorthPointer(
     drawLine(color = color, start = outer, end = inner, strokeWidth = 4.dp.toPx())
 }
 
-private val CompassAmber = Color(0xFFFFC84A)
 private val CompassMutedText = Color(0xFF9AA5AE)
 private val MagneticPointer = Color.White
 private val TruePointer = Color.Red

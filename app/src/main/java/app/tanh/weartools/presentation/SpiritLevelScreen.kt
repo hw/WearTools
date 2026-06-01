@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -17,13 +16,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleEventObserver
-import androidx.lifecycle.LifecycleOwner
 import androidx.wear.compose.material3.MaterialTheme
 import androidx.wear.compose.material3.Text
 import androidx.wear.compose.ui.tooling.preview.WearPreviewDevices
@@ -40,30 +38,15 @@ fun SpiritLevelScreen(
     isActive: Boolean,
 ) {
     val context = LocalContext.current
+    val haptics = LocalHapticFeedback.current
     var rawReading by remember { mutableStateOf(LevelReading()) }
     var zeroX by remember { mutableFloatStateOf(preferences.levelZeroX) }
     var zeroY by remember { mutableFloatStateOf(preferences.levelZeroY) }
     val reading = SensorMath.calibratedLevel(rawReading, zeroX, zeroY)
 
     if (isActive) {
-        DisposableEffect(context) {
-            val controller = LevelSensorController(context) { rawReading = it }
-            val lifecycle = (context as LifecycleOwner).lifecycle
-            val observer =
-                LifecycleEventObserver { _, event ->
-                    when (event) {
-                        Lifecycle.Event.ON_START -> controller.start()
-                        Lifecycle.Event.ON_STOP -> controller.stop()
-                        else -> Unit
-                    }
-                }
-            lifecycle.addObserver(observer)
-            if (lifecycle.currentState.isAtLeast(Lifecycle.State.STARTED)) controller.start()
-            onDispose {
-                lifecycle.removeObserver(observer)
-                controller.stop()
-            }
-        }
+        val controller = remember(context) { LevelSensorController(context) { rawReading = it } }
+        SensorLifecycleEffect(controller, onStart = controller::start, onStop = controller::stop)
     }
 
     SpiritLevelFace(
@@ -73,11 +56,13 @@ fun SpiritLevelScreen(
             zeroY = rawReading.yDegrees
             preferences.levelZeroX = zeroX
             preferences.levelZeroY = zeroY
+            haptics.performHapticFeedback(HapticFeedbackType.LongPress)
         },
         onResetZero = {
             zeroX = 0f
             zeroY = 0f
             preferences.resetLevelZero()
+            haptics.performHapticFeedback(HapticFeedbackType.LongPress)
         },
     )
 }
