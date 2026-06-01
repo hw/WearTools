@@ -1,0 +1,33 @@
+# Gradle and Kotlin
+.gradle/
+.kotlin/
+**/build/
+
+# Local Android SDK configuration
+local.properties
+
+# Android Studio and IntelliJ local state
+*.iml
+.idea/caches/
+.idea/libraries/
+.idea/modules/
+.idea/modules.xml
+.idea/workspace.xml
+.idea/navEditor.xml
+.idea/assetWizardSettings.xml
+.idea/deploymentTargetSelector.xml
+.idea/deviceManager.xml
+.idea/studiobot.xml
+
+# Android build tooling
+captures/
+.externalNativeBuild/
+.cxx/
+
+# Local agent metadata
+.agents/
+.codex/
+
+# OS files
+.DS_Store
+Thumbs.db
