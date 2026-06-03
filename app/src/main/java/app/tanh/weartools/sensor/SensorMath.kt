@@ -6,6 +6,8 @@ import kotlin.math.sqrt
 
 object SensorMath {
     private const val DEGREES_PER_RADIAN = 180f / Math.PI.toFloat()
+    private val CARDINAL_DIRECTIONS =
+        arrayOf("N", "NE", "E", "SE", "S", "SW", "W", "NW")
 
     fun levelAngles(gravity: Vector3): LevelReading {
         val xDegrees =
@@ -82,8 +84,8 @@ object SensorMath {
     }
 
     fun cardinalDirection(headingDegrees: Float): String {
-        val directions = arrayOf("N", "NE", "E", "SE", "S", "SW", "W", "NW")
-        val index = ((normalizeHeading(headingDegrees) + 22.5f) / 45f).toInt() % directions.size
-        return directions[index]
+        val index =
+            ((normalizeHeading(headingDegrees) + 22.5f) / 45f).toInt() % CARDINAL_DIRECTIONS.size
+        return CARDINAL_DIRECTIONS[index]
     }
 }

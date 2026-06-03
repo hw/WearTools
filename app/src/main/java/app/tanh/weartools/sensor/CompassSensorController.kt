@@ -27,8 +27,10 @@ class CompassSensorController(
         when {
             rotationVector != null -> {
                 sensorManager.registerListener(this, rotationVector, SensorManager.SENSOR_DELAY_UI)
+                // Magnetometer is only needed here to surface accuracy (the low-accuracy
+                // indicator) via onAccuracyChanged, so sample it slowly to save power.
                 magneticField?.let {
-                    sensorManager.registerListener(this, it, SensorManager.SENSOR_DELAY_UI)
+                    sensorManager.registerListener(this, it, SensorManager.SENSOR_DELAY_NORMAL)
                 }
             }
             accelerometer != null && magneticField != null -> {
@@ -54,8 +56,12 @@ class CompassSensorController(
                 publishFallbackHeading()
             }
             Sensor.TYPE_MAGNETIC_FIELD -> {
-                geomagnetic = smoothed(event.values, geomagnetic)
-                if (rotationVector == null) publishFallbackHeading()
+                // When the rotation vector drives the heading, mag events only carry accuracy
+                // (handled in onAccuracyChanged); skip the unused smoothing work.
+                if (rotationVector == null) {
+                    geomagnetic = smoothed(event.values, geomagnetic)
+                    publishFallbackHeading()
+                }
             }
         }
     }
@@ -91,11 +97,14 @@ class CompassSensorController(
         )
     }
 
+    // Mutates and returns [previous] (privately owned) to avoid a per-event allocation; the
+    // first sample copies the framework-owned [values] so we never retain its reused array.
     private fun smoothed(values: FloatArray, previous: FloatArray?): FloatArray {
         if (previous == null) return values.copyOf()
-        return FloatArray(3) { index ->
-            previous[index] + FILTER_ALPHA * (values[index] - previous[index])
+        for (index in previous.indices) {
+            previous[index] += FILTER_ALPHA * (values[index] - previous[index])
         }
+        return previous
     }
 
     private companion object {

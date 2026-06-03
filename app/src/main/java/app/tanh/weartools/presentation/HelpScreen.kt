@@ -57,7 +57,7 @@ fun HelpScreen() {
             )
             helpSection(
                 title = "Low accuracy",
-                body = "Move the watch in a figure-eight motion away from metal objects to recalibrate the compass.\n\n",
+                body = "When the magnetic sensor's accuracy is low, a \u2248 symbol appears before the heading value.\nTo recalibrate, move the watch through a figure-eight motion, away from any metal objects.\n\n",
             )
             helpSection(
                 title = "Developer",

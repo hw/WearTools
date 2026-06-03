@@ -7,7 +7,6 @@ import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -19,7 +18,6 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.nativeCanvas
-import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
@@ -40,6 +38,7 @@ import java.util.Locale
 import kotlin.math.cos
 import kotlin.math.roundToInt
 import kotlin.math.sin
+import androidx.core.graphics.withSave
 
 @Composable
 fun CompassScreen(
@@ -47,6 +46,7 @@ fun CompassScreen(
     permissionRefresh: Int,
     isActive: Boolean,
     onRequestLocationPermission: () -> Unit,
+    onFirstReading: () -> Unit = {},
 ) {
     val context = LocalContext.current
     var trueNorthEnabled by remember { mutableStateOf(preferences.trueNorthEnabled) }
@@ -57,11 +57,18 @@ fun CompassScreen(
     if (isActive) {
         val controller =
             remember(context, permissionRefresh, trueNorthEnabled) {
+                var firstReading = true
                 CompassSensorController(
                     context = context,
                     locationData = trueNorthProvider::locationData,
                     trueNorthEnabled = { trueNorthEnabled },
-                    onReading = { reading = it },
+                    onReading = {
+                        reading = it
+                        if (firstReading) {
+                            firstReading = false
+                            onFirstReading()
+                        }
+                    },
                 )
             }
         SensorLifecycleEffect(controller, onStart = controller::start, onStop = controller::stop)
@@ -107,7 +114,8 @@ private fun CompassFace(
                     text =
                         String.format(
                             Locale.US,
-                            "%03d\u00b0  %s",
+                            "%s%03d\u00b0  %s",
+                            if (reading.lowAccuracy) "\u2248 " else "",
                             SensorMath.displayHeading(reading.headingDegrees),
                             SensorMath.cardinalDirection(reading.headingDegrees),
                         ),
@@ -126,7 +134,7 @@ private fun CompassFace(
                                 Locale.US,
                                 "%.5f, %.5f",
                                 reading.latitudeDegrees,
-                                reading.longitudeDegrees,
+                                reading.longitudeDegrees
                             ),
                         color = CompassMutedText,
                         style = MaterialTheme.typography.labelSmall,
@@ -269,11 +277,11 @@ private fun android.graphics.Canvas.drawRotatedLabel(
     bearingDegrees: Float,
     paint: Paint,
 ) {
-    save()
-    rotate(bearingDegrees, x, y)
-    val baseline = y - (paint.fontMetrics.ascent + paint.fontMetrics.descent) / 2f
-    drawText(label, x, baseline, paint)
-    restore()
+    withSave {
+        rotate(bearingDegrees, x, y)
+        val baseline = y - (paint.fontMetrics.ascent + paint.fontMetrics.descent) / 2f
+        drawText(label, x, baseline, paint)
+    }
 }
 
 private fun androidx.compose.ui.graphics.drawscope.DrawScope.drawNorthPointer(

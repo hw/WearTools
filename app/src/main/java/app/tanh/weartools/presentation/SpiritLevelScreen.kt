@@ -36,6 +36,7 @@ import java.util.Locale
 fun SpiritLevelScreen(
     preferences: AppPreferences,
     isActive: Boolean,
+    onFirstReading: () -> Unit = {},
 ) {
     val context = LocalContext.current
     val haptics = LocalHapticFeedback.current
@@ -45,7 +46,17 @@ fun SpiritLevelScreen(
     val reading = SensorMath.calibratedLevel(rawReading, zeroX, zeroY)
 
     if (isActive) {
-        val controller = remember(context) { LevelSensorController(context) { rawReading = it } }
+        val controller =
+            remember(context) {
+                var firstReading = true
+                LevelSensorController(context) {
+                    rawReading = it
+                    if (firstReading) {
+                        firstReading = false
+                        onFirstReading()
+                    }
+                }
+            }
         SensorLifecycleEffect(controller, onStart = controller::start, onStop = controller::stop)
     }
 

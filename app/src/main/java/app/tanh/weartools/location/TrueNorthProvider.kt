@@ -1,15 +1,12 @@
 package app.tanh.weartools.location
 
 import android.annotation.SuppressLint
-import android.Manifest
 import android.content.Context
-import android.content.pm.PackageManager
 import android.hardware.GeomagneticField
 import android.location.Location
 import android.location.LocationManager
 import android.os.Build
 import android.os.SystemClock
-import androidx.core.content.ContextCompat
 import app.tanh.weartools.sensor.CompassLocationData
 
 class TrueNorthProvider(private val context: Context) {
@@ -57,7 +54,7 @@ class TrueNorthProvider(private val context: Context) {
     }
 
     private fun latestKnownLocation(): Location? {
-        if (!hasLocationPermission()) return null
+        if (!hasLocationPermission(context)) return null
         return locationManager
             .getProviders(true)
             .mapNotNull(::lastKnownLocation)
@@ -67,12 +64,6 @@ class TrueNorthProvider(private val context: Context) {
     @SuppressLint("MissingPermission")
     private fun lastKnownLocation(provider: String): Location? =
         runCatching { locationManager.getLastKnownLocation(provider) }.getOrNull()
-
-    private fun hasLocationPermission(): Boolean =
-        ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) ==
-            PackageManager.PERMISSION_GRANTED ||
-            ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) ==
-            PackageManager.PERMISSION_GRANTED
 
     private companion object {
         const val EMPTY_LOCATION_CACHE_MILLIS = 5_000L
