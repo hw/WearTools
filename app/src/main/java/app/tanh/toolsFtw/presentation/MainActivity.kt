@@ -1,17 +1,17 @@
-package app.tanh.weartools.presentation
+package app.tanh.toolsFtw.presentation
 
 import android.os.Bundle
 import android.view.WindowManager
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import app.tanh.weartools.presentation.theme.WearToolsTheme
+import app.tanh.toolsFtw.presentation.theme.ToolsFtwTheme
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            WearToolsTheme {
-                WearToolsApp()
+            ToolsFtwTheme {
+                ToolsFtwApp()
             }
         }
     }

@@ -12,7 +12,7 @@ val buildDateTime =
         .format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm 'SGT'"))
 
 android {
-    namespace = "app.tanh.weartools"
+    namespace = "app.tanh.toolsFtw"
     compileSdk {
         version = release(36) {
             minorApiLevel = 1
@@ -20,7 +20,7 @@ android {
     }
 
     defaultConfig {
-        applicationId = "app.tanh.weartools"
+        applicationId = "app.tanh.toolsFtw"
         minSdk = 30
         targetSdk = 36
         versionCode = 1

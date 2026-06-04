@@ -1,10 +1,10 @@
-package app.tanh.weartools.presentation.theme
+package app.tanh.toolsFtw.presentation.theme
 
 import androidx.compose.runtime.Composable
 import androidx.wear.compose.material3.MaterialTheme
 
 @Composable
-fun WearToolsTheme(
+fun ToolsFtwTheme(
     content: @Composable () -> Unit
 ) {
     /**

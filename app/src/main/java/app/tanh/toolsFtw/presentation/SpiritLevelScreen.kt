@@ -1,4 +1,4 @@
-package app.tanh.weartools.presentation
+package app.tanh.toolsFtw.presentation
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.gestures.detectTapGestures
@@ -20,16 +20,18 @@ import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.wear.compose.material3.MaterialTheme
 import androidx.wear.compose.material3.Text
 import androidx.wear.compose.ui.tooling.preview.WearPreviewDevices
-import app.tanh.weartools.presentation.theme.WearToolsTheme
-import app.tanh.weartools.sensor.LevelReading
-import app.tanh.weartools.sensor.LevelSensorController
-import app.tanh.weartools.sensor.SensorMath
-import app.tanh.weartools.settings.AppPreferences
+import app.tanh.toolsFtw.R
+import app.tanh.toolsFtw.presentation.theme.ToolsFtwTheme
+import app.tanh.toolsFtw.sensor.LevelReading
+import app.tanh.toolsFtw.sensor.LevelSensorController
+import app.tanh.toolsFtw.sensor.SensorMath
+import app.tanh.toolsFtw.settings.AppPreferences
 import java.util.Locale
 
 @Composable
@@ -45,20 +47,17 @@ fun SpiritLevelScreen(
     var zeroY by remember { mutableFloatStateOf(preferences.levelZeroY) }
     val reading = SensorMath.calibratedLevel(rawReading, zeroX, zeroY)
 
-    if (isActive) {
-        val controller =
-            remember(context) {
-                var firstReading = true
-                LevelSensorController(context) {
-                    rawReading = it
-                    if (firstReading) {
-                        firstReading = false
-                        onFirstReading()
-                    }
-                }
-            }
-        SensorLifecycleEffect(controller, onStart = controller::start, onStop = controller::stop)
-    }
+    ActiveSensorLifecycleEffect(
+        isActive = isActive,
+        keys = arrayOf(context),
+        createController = { onReading: (LevelReading) -> Unit ->
+            LevelSensorController(context, onReading)
+        },
+        onStart = LevelSensorController::start,
+        onStop = LevelSensorController::stop,
+        onReading = { nextReading -> rawReading = nextReading },
+        onFirstReading = onFirstReading,
+    )
 
     SpiritLevelFace(
         reading = reading,
@@ -113,7 +112,7 @@ private fun SpiritLevelFace(
             }
         } else {
             Text(
-                text = "Level sensor unavailable",
+                text = stringResource(R.string.level_sensor_unavailable),
                 modifier = Modifier.align(Alignment.Center),
                 textAlign = TextAlign.Center,
             )
@@ -157,10 +156,11 @@ private fun Bullseye(
 
 private val LevelGreen = Color(0xFF7CFF6B)
 private val LevelAmber = Color(0xFFFFC84A)
+
 @WearPreviewDevices
 @Composable
 private fun SpiritLevelPreview() {
-    WearToolsTheme {
+    ToolsFtwTheme {
         SpiritLevelFace(
             reading = LevelReading(xDegrees = 3f, yDegrees = -2f),
             onSetZero = {},

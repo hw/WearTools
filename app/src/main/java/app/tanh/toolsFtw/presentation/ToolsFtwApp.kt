@@ -1,4 +1,4 @@
-package app.tanh.weartools.presentation
+package app.tanh.toolsFtw.presentation
 
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -13,6 +13,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.wear.compose.foundation.pager.HorizontalPager
 import androidx.wear.compose.foundation.pager.rememberPagerState
 import androidx.wear.compose.material3.AnimatedPage
@@ -20,17 +21,23 @@ import androidx.wear.compose.material3.AppScaffold
 import androidx.wear.compose.material3.HorizontalPagerScaffold
 import androidx.wear.compose.material3.PagerScaffoldDefaults
 import androidx.wear.compose.material3.TimeText
-import app.tanh.weartools.location.LOCATION_PERMISSIONS
-import app.tanh.weartools.location.hasLocationPermission
-import app.tanh.weartools.settings.AppPreferences
-import app.tanh.weartools.settings.Tool
+import app.tanh.toolsFtw.location.LOCATION_PERMISSIONS
+import app.tanh.toolsFtw.location.hasLocationPermission
+import app.tanh.toolsFtw.settings.AppPreferences
+import app.tanh.toolsFtw.settings.Tool
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.distinctUntilChanged
 
 @Composable
-fun WearToolsApp() {
-    val context = androidx.compose.ui.platform.LocalContext.current
+fun ToolsFtwApp() {
+    val context = LocalContext.current
     val preferences = remember { AppPreferences(context) }
-    val initialPage = if (preferences.lastTool == Tool.COMPASS) COMPASS_PAGE else LEVEL_PAGE
+    val initialPage =
+        when (preferences.lastTool) {
+            Tool.COMPASS -> COMPASS_PAGE
+            Tool.LEVEL -> LEVEL_PAGE
+            null -> HELP_PAGE
+        }
     val pagerState = rememberPagerState(initialPage = initialPage) { PAGE_COUNT }
     var permissionRefresh by remember { mutableIntStateOf(0) }
     var isLoading by remember { mutableStateOf(true) }
@@ -38,6 +45,13 @@ fun WearToolsApp() {
         rememberLauncherForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) {
             permissionRefresh++
         }
+
+    if (initialPage == HELP_PAGE) {
+        LaunchedEffect(Unit) {
+            delay(HELP_LOADING_TIMEOUT_MS)
+            isLoading = false
+        }
+    }
 
     LaunchedEffect(pagerState) {
         snapshotFlow { pagerState.currentPage }
@@ -107,3 +121,4 @@ private const val COMPASS_PAGE = 0
 private const val LEVEL_PAGE = 1
 private const val HELP_PAGE = 2
 private const val PAGE_COUNT = 3
+private const val HELP_LOADING_TIMEOUT_MS = 400L

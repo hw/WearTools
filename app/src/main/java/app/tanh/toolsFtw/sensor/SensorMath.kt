@@ -1,4 +1,4 @@
-package app.tanh.weartools.sensor
+package app.tanh.toolsFtw.sensor
 
 import kotlin.math.atan2
 import kotlin.math.roundToInt
@@ -9,12 +9,19 @@ object SensorMath {
     private val CARDINAL_DIRECTIONS =
         arrayOf("N", "NE", "E", "SE", "S", "SW", "W", "NW")
 
-    fun levelAngles(gravity: Vector3): LevelReading {
+    fun levelAngles(gravity: Vector3): LevelReading =
+        levelAngles(gravity.x, gravity.y, gravity.z)
+
+    fun levelAngles(
+        gravityX: Float,
+        gravityY: Float,
+        gravityZ: Float,
+    ): LevelReading {
         val xDegrees =
-            atan2(gravity.x, sqrt(gravity.y * gravity.y + gravity.z * gravity.z)) *
+            atan2(gravityX, sqrt(gravityY * gravityY + gravityZ * gravityZ)) *
                 DEGREES_PER_RADIAN
         val yDegrees =
-            atan2(gravity.y, sqrt(gravity.x * gravity.x + gravity.z * gravity.z)) *
+            atan2(gravityY, sqrt(gravityX * gravityX + gravityZ * gravityZ)) *
                 DEGREES_PER_RADIAN
         return LevelReading(xDegrees = xDegrees, yDegrees = yDegrees)
     }

@@ -1,9 +1,11 @@
-package app.tanh.weartools.presentation
+package app.tanh.toolsFtw.presentation
 
+import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -14,12 +16,14 @@ import androidx.wear.compose.material3.ScreenScaffold
 import androidx.wear.compose.material3.Text
 import androidx.wear.compose.material3.TimeText
 import androidx.wear.compose.ui.tooling.preview.WearPreviewDevices
-import app.tanh.weartools.BuildConfig
-import app.tanh.weartools.presentation.theme.WearToolsTheme
+import app.tanh.toolsFtw.BuildConfig
+import app.tanh.toolsFtw.R
+import app.tanh.toolsFtw.presentation.theme.ToolsFtwTheme
 
 @Composable
 fun HelpScreen() {
     val listState = rememberTransformingLazyColumnState()
+    val appName = stringResource(R.string.app_name)
 
     ScreenScaffold(
         scrollState = listState,
@@ -31,7 +35,7 @@ fun HelpScreen() {
         ) {
             item {
                 Text(
-                    text = "HELP",
+                    text = stringResource(R.string.help_header),
                     modifier = HelpTextModifier,
                     color = MaterialTheme.colorScheme.primary,
                     fontWeight = FontWeight.Bold,
@@ -40,42 +44,45 @@ fun HelpScreen() {
                 )
             }
             helpSection(
-                title = "Navigate",
-                body = "Swipe left or right to switch between level, compass, and help.",
+                title = R.string.help_navigate_title,
+                body = R.string.help_navigate_body,
             )
             helpSection(
-                title = "Spirit level",
-                body = "Tap the screen to set the current angle as zero. Long press to reset zero.",
+                title = R.string.help_level_title,
+                body = R.string.help_level_body,
             )
             helpSection(
-                title = "Compass",
-                body = "Tap the screen to switch between true north and magnetic north.",
+                title = R.string.help_compass_title,
+                body = R.string.help_compass_body,
             )
             helpSection(
-                title = "True north",
-                body = "True north uses your location. If location is unavailable, the compass falls back to magnetic north.",
+                title = R.string.help_true_north_title,
+                body = R.string.help_true_north_body,
             )
             helpSection(
-                title = "Low accuracy",
-                body = "When the magnetic sensor's accuracy is low, a \u2248 symbol appears before the heading value.\nTo recalibrate, move the watch through a figure-eight motion, away from any metal objects.\n\n",
+                title = R.string.help_low_accuracy_title,
+                body = R.string.help_low_accuracy_body,
             )
             helpSection(
-                title = "Developer",
-                body = "WearTools is developed by\n\nHockWoo Tan.\n\nBuilt ${BuildConfig.BUILD_DATE_TIME}\n\n",
+                title = R.string.help_developer_title,
+                body = R.string.help_developer_body,
                 textAlign = TextAlign.Center,
+                bodyArgs = arrayOf(appName, BuildConfig.BUILD_DATE_TIME),
             )
+
         }
     }
 }
 
 private fun androidx.wear.compose.foundation.lazy.TransformingLazyColumnScope.helpSection(
-    title: String,
-    body: String,
+    @StringRes title: Int,
+    @StringRes body: Int,
     textAlign: TextAlign = TextAlign.Start,
+    bodyArgs: Array<Any> = emptyArray(),
 ) {
     item {
         Text(
-            text = title,
+            text = stringResource(title),
             modifier = HelpTextModifier.padding(top = 8.dp),
             fontWeight = FontWeight.Bold,
             style = MaterialTheme.typography.labelSmall,
@@ -84,7 +91,7 @@ private fun androidx.wear.compose.foundation.lazy.TransformingLazyColumnScope.he
     }
     item {
         Text(
-            text = body,
+            text = if (bodyArgs.isEmpty()) stringResource(body) else stringResource(body, *bodyArgs),
             modifier = HelpTextModifier,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             style = MaterialTheme.typography.bodySmall,
@@ -98,7 +105,7 @@ private val HelpTextModifier = Modifier.fillMaxWidth().padding(horizontal = 18.d
 @WearPreviewDevices
 @Composable
 private fun HelpScreenPreview() {
-    WearToolsTheme {
+    ToolsFtwTheme {
         HelpScreen()
     }
 }

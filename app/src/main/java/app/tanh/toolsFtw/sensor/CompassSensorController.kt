@@ -1,11 +1,13 @@
-package app.tanh.weartools.sensor
+package app.tanh.toolsFtw.sensor
 
 import android.content.Context
 import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
+import android.os.SystemClock
 import kotlin.math.PI
+import kotlin.math.abs
 
 class CompassSensorController(
     context: Context,
@@ -22,8 +24,13 @@ class CompassSensorController(
     private var gravity: FloatArray? = null
     private var geomagnetic: FloatArray? = null
     private var accuracy: Int? = null
+    private var lastPublishedReading: CompassReading? = null
+    private var lastPublishedTrueNorthEnabled = false
+    private var lastPublishedAtMillis = 0L
 
     fun start() {
+        lastPublishedReading = null
+        lastPublishedAtMillis = 0L
         when {
             rotationVector != null -> {
                 sensorManager.registerListener(this, rotationVector, SensorManager.SENSOR_DELAY_UI)
@@ -84,17 +91,65 @@ class CompassSensorController(
         SensorManager.getOrientation(rotationMatrix, orientation)
         val magneticHeading = SensorMath.normalizeHeading(orientation[0] * 180f / PI.toFloat())
         val shouldUseTrueNorth = trueNorthEnabled()
+        val lowAccuracy = accuracy?.let { it <= SensorManager.SENSOR_STATUS_ACCURACY_LOW } ?: false
+        val now = SystemClock.elapsedRealtime()
+        val previousReading = lastPublishedReading
+        if (
+            previousReading != null &&
+                !shouldPublishCompassReading(
+                    previous = previousReading,
+                    previousTrueNorthEnabled = lastPublishedTrueNorthEnabled,
+                    nextMagneticHeadingDegrees = magneticHeading,
+                    nextTrueNorthEnabled = shouldUseTrueNorth,
+                    nextLowAccuracy = lowAccuracy,
+                    elapsedMillis = now - lastPublishedAtMillis,
+                )
+        ) {
+            return
+        }
         val location = locationData()
-        onReading(
+        val reading =
             SensorMath.compassReading(
                 magneticHeadingDegrees = magneticHeading,
                 trueNorthEnabled = shouldUseTrueNorth,
                 declinationDegrees = location.declinationDegrees,
-                lowAccuracy = accuracy?.let { it <= SensorManager.SENSOR_STATUS_ACCURACY_LOW } ?: false,
+                lowAccuracy = lowAccuracy,
                 aslMeters = location.aslMeters,
                 coordinates = location.coordinates,
-            ),
-        )
+            )
+        onReading(reading)
+        lastPublishedReading = reading
+        lastPublishedTrueNorthEnabled = shouldUseTrueNorth
+        lastPublishedAtMillis = now
+    }
+
+    private fun shouldPublishCompassReading(
+        previous: CompassReading,
+        previousTrueNorthEnabled: Boolean,
+        nextMagneticHeadingDegrees: Float,
+        nextTrueNorthEnabled: Boolean,
+        nextLowAccuracy: Boolean,
+        elapsedMillis: Long,
+    ): Boolean {
+        if (
+            previous.lowAccuracy != nextLowAccuracy ||
+                previousTrueNorthEnabled != nextTrueNorthEnabled ||
+                elapsedMillis >= COMPASS_READING_MAX_INTERVAL_MILLIS
+        ) {
+            return true
+        }
+        return headingDelta(
+            previous.magneticHeadingDegrees,
+            nextMagneticHeadingDegrees,
+        ) >= COMPASS_HEADING_EPSILON_DEGREES
+    }
+
+    private fun headingDelta(
+        previousDegrees: Float,
+        nextDegrees: Float,
+    ): Float {
+        val delta = abs(SensorMath.normalizeHeading(nextDegrees - previousDegrees))
+        return minOf(delta, 360f - delta)
     }
 
     // Mutates and returns [previous] (privately owned) to avoid a per-event allocation; the
@@ -109,5 +164,7 @@ class CompassSensorController(
 
     private companion object {
         const val FILTER_ALPHA = 0.18f
+        const val COMPASS_READING_MAX_INTERVAL_MILLIS = 80L
+        const val COMPASS_HEADING_EPSILON_DEGREES = 0.5f
     }
 }

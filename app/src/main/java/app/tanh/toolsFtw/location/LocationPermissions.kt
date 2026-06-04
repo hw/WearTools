@@ -1,4 +1,4 @@
-package app.tanh.weartools.location
+package app.tanh.toolsFtw.location
 
 import android.Manifest
 import android.content.Context

@@ -1,4 +1,4 @@
-package app.tanh.weartools.presentation
+package app.tanh.toolsFtw.presentation
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -8,13 +8,15 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.wear.compose.material3.CircularProgressIndicator
 import androidx.wear.compose.material3.MaterialTheme
 import androidx.wear.compose.material3.Text
 import androidx.wear.compose.ui.tooling.preview.WearPreviewDevices
-import app.tanh.weartools.presentation.theme.WearToolsTheme
+import app.tanh.toolsFtw.R
+import app.tanh.toolsFtw.presentation.theme.ToolsFtwTheme
 
 @Composable
 fun LoadingScreen(modifier: Modifier = Modifier) {
@@ -25,7 +27,7 @@ fun LoadingScreen(modifier: Modifier = Modifier) {
     ) {
         CircularProgressIndicator(modifier = Modifier.size(48.dp))
         Text(
-            text = "WearTools",
+            text = stringResource(R.string.app_name),
             modifier = Modifier.padding(top = 12.dp),
             textAlign = TextAlign.Center,
             style = MaterialTheme.typography.titleMedium,
@@ -36,7 +38,7 @@ fun LoadingScreen(modifier: Modifier = Modifier) {
 @WearPreviewDevices
 @Composable
 private fun LoadingPreview() {
-    WearToolsTheme {
+    ToolsFtwTheme {
         LoadingScreen()
     }
 }

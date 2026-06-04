@@ -1,3 +1,32 @@
 <resources>
-    <string name="app_name">WearTools</string>
+    <string name="app_name">ToolsFtw</string>
+
+    <!-- Sensor unavailable states -->
+    <string name="level_sensor_unavailable">Level sensor unavailable</string>
+    <string name="compass_sensor_unavailable">Compass sensor unavailable</string>
+
+    <!-- Compass mode labels -->
+    <string name="compass_mode_true_north">TRUE NORTH</string>
+    <string name="compass_mode_magnetic_no_fix">MAGNETIC · NO FIX</string>
+    <string name="compass_mode_magnetic">MAGNETIC</string>
+
+    <!-- Altitude readout (%1$d is the rounded altitude) -->
+    <string name="altitude_meters">%1$d m ASL</string>
+    <string name="altitude_feet">%1$d ft ASL</string>
+
+    <!-- Help screen -->
+    <string name="help_header">HELP</string>
+    <string name="help_navigate_title">Navigate</string>
+    <string name="help_navigate_body">Swipe left or right to switch between level, compass, and help.</string>
+    <string name="help_level_title">Spirit level</string>
+    <string name="help_level_body">Tap the screen to set the current angle as zero. Long press to reset zero.</string>
+    <string name="help_compass_title">Compass</string>
+    <string name="help_compass_body">Tap the screen to switch between true north and magnetic north.</string>
+    <string name="help_true_north_title">True north</string>
+    <string name="help_true_north_body">True north uses your location. If location is unavailable, the compass falls back to magnetic north.</string>
+    <string name="help_low_accuracy_title">Low accuracy</string>
+    <string name="help_low_accuracy_body">When the magnetic sensor\'s accuracy is low, a ≈ symbol appears before the heading value.\n\nTo recalibrate, move the watch through a figure-eight motion, away from any metal objects.\n\n</string>
+    <string name="help_developer_title">Developer</string>
+    <!-- %1$s is the app name, %2$s is the build date/time -->
+    <string name="help_developer_body">%1$s is developed by\n\nHockWoo Tan\ntanh.app\n\nBuilt %2$s\n\n</string>
 </resources>

@@ -1,4 +1,4 @@
-package app.tanh.weartools.sensor
+package app.tanh.toolsFtw.sensor
 
 data class Vector3(
     val x: Float,

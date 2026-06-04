@@ -22,5 +22,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "WearTools"
+rootProject.name = "ToolsFtw"
 include(":app")

@@ -1,6 +1,6 @@
-# WearTools
+# ToolsFTW
 
-WearTools is a standalone WearOS utility app with a compass and a spirit level. It is designed
+ToolsFTW is a standalone WearOS utility app with a compass and a spirit level. It is designed
 for quick use directly on a watch without a companion phone app.
 
 ## Features
@@ -35,7 +35,7 @@ Swipe horizontally to move between compass, spirit level, and help.
 
 ## Persisted Settings
 
-WearTools stores the following preferences on the watch:
+ToolsFTW stores the following preferences on the watch:
 
 - Last-used tool
 - True-north or magnetic-north mode
@@ -84,5 +84,5 @@ To install the debug build on a connected watch:
 ## Package
 
 ```text
-app.tanh.weartools
+app.tanh.toolsFtw
 ```

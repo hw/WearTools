@@ -1,6 +1,7 @@
-package app.tanh.weartools.settings
+package app.tanh.toolsFtw.settings
 
 import android.content.Context
+import androidx.core.content.edit
 
 enum class Tool {
     LEVEL,
@@ -14,40 +15,42 @@ enum class AltitudeUnit {
 
 class AppPreferences(context: Context) {
     private val preferences =
-        context.getSharedPreferences("wear_tools_preferences", Context.MODE_PRIVATE)
+        context.getSharedPreferences("tools_ftw_preferences", Context.MODE_PRIVATE)
 
-    var lastTool: Tool
+    /** The last tool the user opened, or null if none has been saved yet (fresh install). */
+    var lastTool: Tool?
         get() =
-            runCatching {
-                Tool.valueOf(preferences.getString(KEY_LAST_TOOL, Tool.LEVEL.name)!!)
-            }.getOrDefault(Tool.LEVEL)
-        set(value) = preferences.edit().putString(KEY_LAST_TOOL, value.name).apply()
+            preferences.getString(KEY_LAST_TOOL, null)?.let { name ->
+                runCatching { Tool.valueOf(name) }.getOrNull()
+            }
+        set(value) {
+            if (value != null) preferences.edit { putString(KEY_LAST_TOOL, value.name) }
+        }
 
     var trueNorthEnabled: Boolean
         get() = preferences.getBoolean(KEY_TRUE_NORTH, true)
-        set(value) = preferences.edit().putBoolean(KEY_TRUE_NORTH, value).apply()
+        set(value) = preferences.edit { putBoolean(KEY_TRUE_NORTH, value) }
 
     var altitudeUnit: AltitudeUnit
         get() =
             runCatching {
                 AltitudeUnit.valueOf(preferences.getString(KEY_ALTITUDE_UNIT, AltitudeUnit.METERS.name)!!)
             }.getOrDefault(AltitudeUnit.METERS)
-        set(value) = preferences.edit().putString(KEY_ALTITUDE_UNIT, value.name).apply()
+        set(value) = preferences.edit { putString(KEY_ALTITUDE_UNIT, value.name) }
 
     var levelZeroX: Float
         get() = preferences.getFloat(KEY_LEVEL_ZERO_X, 0f)
-        set(value) = preferences.edit().putFloat(KEY_LEVEL_ZERO_X, value).apply()
+        set(value) = preferences.edit { putFloat(KEY_LEVEL_ZERO_X, value) }
 
     var levelZeroY: Float
         get() = preferences.getFloat(KEY_LEVEL_ZERO_Y, 0f)
-        set(value) = preferences.edit().putFloat(KEY_LEVEL_ZERO_Y, value).apply()
+        set(value) = preferences.edit { putFloat(KEY_LEVEL_ZERO_Y, value) }
 
     fun resetLevelZero() {
-        preferences
-            .edit()
-            .remove(KEY_LEVEL_ZERO_X)
-            .remove(KEY_LEVEL_ZERO_Y)
-            .apply()
+        preferences.edit {
+            remove(KEY_LEVEL_ZERO_X)
+            remove(KEY_LEVEL_ZERO_Y)
+        }
     }
 
     private companion object {

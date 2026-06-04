@@ -1,4 +1,4 @@
-package app.tanh.weartools.sensor
+package app.tanh.toolsFtw.sensor
 
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue

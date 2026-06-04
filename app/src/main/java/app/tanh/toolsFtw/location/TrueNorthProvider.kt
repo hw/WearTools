@@ -1,4 +1,4 @@
-package app.tanh.weartools.location
+package app.tanh.toolsFtw.location
 
 import android.annotation.SuppressLint
 import android.content.Context
@@ -7,7 +7,7 @@ import android.location.Location
 import android.location.LocationManager
 import android.os.Build
 import android.os.SystemClock
-import app.tanh.weartools.sensor.CompassLocationData
+import app.tanh.toolsFtw.sensor.CompassLocationData
 
 class TrueNorthProvider(private val context: Context) {
     private val locationManager = context.getSystemService(LocationManager::class.java)
