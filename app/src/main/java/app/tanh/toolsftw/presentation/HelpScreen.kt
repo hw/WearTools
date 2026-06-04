@@ -1,4 +1,4 @@
-package app.tanh.tools_ftw.presentation
+package app.tanh.toolsftw.presentation
 
 import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -14,11 +14,10 @@ import androidx.wear.compose.foundation.lazy.rememberTransformingLazyColumnState
 import androidx.wear.compose.material3.MaterialTheme
 import androidx.wear.compose.material3.ScreenScaffold
 import androidx.wear.compose.material3.Text
-import androidx.wear.compose.material3.TimeText
 import androidx.wear.compose.ui.tooling.preview.WearPreviewDevices
-import app.tanh.tools_ftw.BuildConfig
-import app.tanh.tools_ftw.R
-import app.tanh.tools_ftw.presentation.theme.ToolsFtwTheme
+import app.tanh.toolsftw.BuildConfig
+import app.tanh.toolsftw.R
+import app.tanh.toolsftw.presentation.theme.ToolsFtwTheme
 
 @Composable
 fun HelpScreen() {
@@ -27,7 +26,6 @@ fun HelpScreen() {
 
     ScreenScaffold(
         scrollState = listState,
-        timeText = { TimeText() },
     ) { contentPadding ->
         TransformingLazyColumn(
             state = listState,
@@ -67,7 +65,7 @@ fun HelpScreen() {
                 title = R.string.help_developer_title,
                 body = R.string.help_developer_body,
                 textAlign = TextAlign.Center,
-                bodyArgs = arrayOf(appName, BuildConfig.BUILD_DATE_TIME),
+                bodyArgs = arrayOf(appName, BuildConfig.GIT_COMMIT_HASH),
             )
 
         }

@@ -1,12 +1,12 @@
-package app.tanh.tools_ftw.presentation
+package app.tanh.toolsftw.presentation
 
 import android.graphics.Bitmap
 import android.graphics.Canvas as AndroidCanvas
 import android.graphics.Paint
+import androidx.core.graphics.createBitmap
 import androidx.core.graphics.withSave
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -22,7 +22,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.nativeCanvas
-import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
@@ -34,15 +34,17 @@ import androidx.compose.ui.unit.dp
 import androidx.wear.compose.material3.MaterialTheme
 import androidx.wear.compose.material3.Text
 import androidx.wear.compose.ui.tooling.preview.WearPreviewDevices
-import app.tanh.tools_ftw.R
-import app.tanh.tools_ftw.location.TrueNorthProvider
-import app.tanh.tools_ftw.presentation.theme.ToolsFtwTheme
-import app.tanh.tools_ftw.sensor.CompassReading
-import app.tanh.tools_ftw.sensor.CompassSensorController
-import app.tanh.tools_ftw.sensor.NorthMode
-import app.tanh.tools_ftw.sensor.SensorMath
-import app.tanh.tools_ftw.settings.AppPreferences
-import app.tanh.tools_ftw.settings.AltitudeUnit
+import app.tanh.toolsftw.R
+import app.tanh.toolsftw.location.TrueNorthProvider
+import app.tanh.toolsftw.location.hasLocationPermission
+import app.tanh.toolsftw.presentation.theme.ToolsFtwColors
+import app.tanh.toolsftw.presentation.theme.ToolsFtwTheme
+import app.tanh.toolsftw.sensor.CompassReading
+import app.tanh.toolsftw.sensor.CompassSensorController
+import app.tanh.toolsftw.sensor.NorthMode
+import app.tanh.toolsftw.sensor.SensorMath
+import app.tanh.toolsftw.settings.AppPreferences
+import app.tanh.toolsftw.settings.AltitudeUnit
 import java.util.Locale
 import kotlin.math.cos
 import kotlin.math.roundToInt
@@ -74,8 +76,14 @@ fun CompassScreen(
                 onReading = onReading,
             )
         },
-        onStart = CompassSensorController::start,
-        onStop = CompassSensorController::stop,
+        onStart = { controller ->
+            if (currentTrueNorthEnabled.value) trueNorthProvider.start()
+            controller.start()
+        },
+        onStop = { controller ->
+            controller.stop()
+            trueNorthProvider.stop()
+        },
         onReading = { nextReading -> reading = nextReading },
         onFirstReading = onFirstReading,
     )
@@ -86,7 +94,15 @@ fun CompassScreen(
         onToggleTrueNorth = {
             trueNorthEnabled = !trueNorthEnabled
             preferences.trueNorthEnabled = trueNorthEnabled
-            if (trueNorthEnabled) onRequestLocationPermission()
+            if (trueNorthEnabled) {
+                trueNorthProvider.start()
+                // Only prompt when we actually lack permission; launching the request when it is
+                // already granted still fires the result callback and needlessly restarts the
+                // provider and sensor controller.
+                if (!hasLocationPermission(context)) onRequestLocationPermission()
+            } else {
+                trueNorthProvider.stop()
+            }
         },
         onToggleAltitudeUnit = {
             altitudeUnit =
@@ -103,28 +119,41 @@ private fun CompassFace(
     onToggleTrueNorth: () -> Unit,
     onToggleAltitudeUnit: () -> Unit = {},
 ) {
-    Box(
-        modifier =
-            Modifier.fillMaxSize()
-                .pointerInput(Unit) {
-                    detectTapGestures(onTap = { onToggleTrueNorth() })
-                },
-    ) {
+    val toggleTrueNorthLabel = stringResource(R.string.action_toggle_true_north)
+    val toggleAltitudeUnitLabel = stringResource(R.string.action_toggle_altitude_unit)
+    Box(modifier = Modifier.fillMaxSize()) {
         if (reading.available) {
+            // Re-format only when a displayed quantity actually changes (the integer heading,
+            // cardinal, or accuracy flag), not on every sub-degree sensor update.
+            val displayHeading = SensorMath.displayHeading(reading.headingDegrees)
+            val cardinal = SensorMath.cardinalDirection(reading.headingDegrees)
+            val headingText =
+                remember(displayHeading, cardinal, reading.lowAccuracy) {
+                    String.format(
+                        Locale.US,
+                        "%s%03d\u00b0  %s",
+                        if (reading.lowAccuracy) "\u2248 " else "",
+                        displayHeading,
+                        cardinal,
+                    )
+                }
+            val coordinatesText =
+                remember(reading.latitudeDegrees, reading.longitudeDegrees) {
+                    val latitude = reading.latitudeDegrees
+                    val longitude = reading.longitudeDegrees
+                    if (latitude != null && longitude != null) {
+                        String.format(Locale.US, "%.5f, %.5f", latitude, longitude)
+                    } else {
+                        null
+                    }
+                }
             CompassDial(reading, Modifier.fillMaxSize())
             Column(
                 modifier = Modifier.align(Alignment.Center),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
                 Text(
-                    text =
-                        String.format(
-                            Locale.US,
-                            "%s%03d\u00b0  %s",
-                            if (reading.lowAccuracy) "\u2248 " else "",
-                            SensorMath.displayHeading(reading.headingDegrees),
-                            SensorMath.cardinalDirection(reading.headingDegrees),
-                        ),
+                    text = headingText,
                     color = Color.White,
                     style = MaterialTheme.typography.titleLarge,
                 )
@@ -137,26 +166,25 @@ private fun CompassFace(
                         },
                     color =
                         when {
-                            reading.mode == NorthMode.TRUE -> TruePointer
-                            reading.trueNorthUnavailable -> NorthFallback
-                            else -> MagneticPointer
+                            reading.mode == NorthMode.TRUE -> ToolsFtwColors.TruePointer
+                            reading.trueNorthUnavailable -> ToolsFtwColors.NorthFallback
+                            else -> ToolsFtwColors.MagneticPointer
                         },
                     style =
                         when {
                             reading.trueNorthUnavailable -> MaterialTheme.typography.bodyExtraSmall
                             else -> MaterialTheme.typography.labelSmall
                         },
+                    modifier =
+                        Modifier.clickable(
+                            onClickLabel = toggleTrueNorthLabel,
+                            onClick = onToggleTrueNorth,
+                        ),
                 )
-                if (reading.latitudeDegrees != null && reading.longitudeDegrees != null) {
+                if (coordinatesText != null) {
                     Text(
-                        text =
-                            String.format(
-                                Locale.US,
-                                "%.5f, %.5f",
-                                reading.latitudeDegrees,
-                                reading.longitudeDegrees
-                            ),
-                        color = CompassMutedText,
+                        text = coordinatesText,
+                        color = ToolsFtwColors.MutedText,
                         style = MaterialTheme.typography.labelSmall,
                     )
                 }
@@ -170,8 +198,12 @@ private fun CompassFace(
                             AltitudeUnit.FEET ->
                                 stringResource(R.string.altitude_feet, (aslMeters * METERS_TO_FEET).roundToInt())
                         },
-                    modifier = Modifier.clickable(onClick = onToggleAltitudeUnit),
-                    color = CompassMutedText,
+                    modifier =
+                        Modifier.clickable(
+                            onClickLabel = toggleAltitudeUnitLabel,
+                            onClick = onToggleAltitudeUnit,
+                        ),
+                    color = ToolsFtwColors.MutedText,
                     style = MaterialTheme.typography.labelSmall,
                 )
             }
@@ -219,7 +251,7 @@ private fun CompassDial(
                     center = center,
                     radius = radius,
                     headingDegrees = trueHeading,
-                    color = TruePointer,
+                    color = ToolsFtwColors.TruePointer,
                     length = cache.longPointerLength,
                     strokeWidth = cache.pointerStroke,
                 )
@@ -228,7 +260,7 @@ private fun CompassDial(
                 center = center,
                 radius = radius,
                 headingDegrees = reading.magneticHeadingDegrees,
-                color = MagneticPointer,
+                color = ToolsFtwColors.MagneticPointer,
                 length = cache.shortPointerLength,
                 strokeWidth = cache.pointerStroke,
             )
@@ -237,7 +269,7 @@ private fun CompassDial(
                 center = center,
                 radius = radius,
                 headingDegrees = reading.magneticHeadingDegrees,
-                color = MagneticPointer,
+                color = ToolsFtwColors.MagneticPointer,
                 length = cache.longPointerLength,
                 strokeWidth = cache.pointerStroke,
             )
@@ -246,7 +278,7 @@ private fun CompassDial(
                     center = center,
                     radius = radius,
                     headingDegrees = trueHeading,
-                    color = TruePointer,
+                    color = ToolsFtwColors.TruePointer,
                     length = cache.shortPointerLength,
                     strokeWidth = cache.pointerStroke,
                 )
@@ -267,7 +299,7 @@ private fun createCompassDialCache(
     size: IntSize,
     density: Density,
 ): CompassDialCache {
-    val bitmap = Bitmap.createBitmap(size.width, size.height, Bitmap.Config.ARGB_8888)
+    val bitmap = createBitmap(size.width, size.height)
     val canvas = AndroidCanvas(bitmap)
     val centerX = size.width / 2f
     val centerY = size.height / 2f
@@ -307,10 +339,10 @@ private fun createCompassDialCache(
     }
     val radius = minOf(size.width, size.height) / 2f - outerInset
 
-    strokePaint.color = DialOuterRingColor
+    strokePaint.color = ToolsFtwColors.OuterRing.toArgb()
     strokePaint.strokeWidth = strokeThick
     canvas.drawCircle(centerX, centerY, radius, strokePaint)
-    strokePaint.color = DialInnerRingColor
+    strokePaint.color = ToolsFtwColors.InnerRing.toArgb()
     strokePaint.strokeWidth = strokeThin
     canvas.drawCircle(centerX, centerY, radius * 0.61f, strokePaint)
 
@@ -440,12 +472,6 @@ private fun labelVector(
     )
 }
 
-private val CompassMutedText = Color(0xFF9AA5AE)
-private val MagneticPointer = Color.White
-private val TruePointer = Color.Red
-private val NorthFallback = Color(0xFFFFC84A)
-private val DialOuterRingColor = 0xFF57636D.toInt()
-private val DialInnerRingColor = 0xFF35414A.toInt()
 private val TickVectors = List(24) { index -> dialVector(index, index * 15f) }
 private val CardinalLabelVectors =
     listOf(

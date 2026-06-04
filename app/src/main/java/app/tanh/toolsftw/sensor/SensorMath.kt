@@ -1,4 +1,4 @@
-package app.tanh.tools_ftw.sensor
+package app.tanh.toolsftw.sensor
 
 import kotlin.math.atan2
 import kotlin.math.roundToInt
@@ -75,7 +75,7 @@ object SensorMath {
         return CompassReading(
             headingDegrees =
                 if (usingTrueNorth) {
-                    trueHeading!!
+                    trueHeading
                 } else {
                     magneticHeading
                 },

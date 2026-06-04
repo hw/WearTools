@@ -1,4 +1,4 @@
-package app.tanh.tools_ftw.location
+package app.tanh.toolsftw.location
 
 import android.Manifest
 import android.content.Context

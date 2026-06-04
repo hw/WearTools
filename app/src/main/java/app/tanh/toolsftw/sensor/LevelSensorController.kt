@@ -1,4 +1,4 @@
-package app.tanh.tools_ftw.sensor
+package app.tanh.toolsftw.sensor
 
 import android.content.Context
 import android.hardware.Sensor
@@ -26,11 +26,14 @@ class LevelSensorController(
     fun start() {
         lastPublishedReading = null
         lastPublishedAtMillis = 0L
+        initialized = false
         if (sensor == null) {
             onReading(LevelReading(available = false))
             return
         }
-        sensorManager.registerListener(this, sensor, SensorManager.SENSOR_DELAY_UI)
+        if (!sensorManager.registerListener(this, sensor, SensorManager.SENSOR_DELAY_UI)) {
+            onReading(LevelReading(available = false))
+        }
     }
 
     fun stop() {
@@ -71,7 +74,7 @@ class LevelSensorController(
     override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) = Unit
 
     private fun lowPass(input: Float, previous: Float): Float =
-        previous + FILTER_ALPHA * (input - previous)
+        previous + SensorTuning.FILTER_ALPHA * (input - previous)
 
     private fun shouldPublishLevelReading(
         previous: LevelReading,
@@ -80,14 +83,12 @@ class LevelSensorController(
     ): Boolean {
         if (previous.available != next.available) return true
         if (!next.available) return false
-        if (elapsedMillis >= LEVEL_READING_MAX_INTERVAL_MILLIS) return true
+        if (elapsedMillis >= SensorTuning.PUBLISH_MAX_INTERVAL_MILLIS) return true
         return abs(previous.xDegrees - next.xDegrees) >= LEVEL_READING_EPSILON_DEGREES ||
             abs(previous.yDegrees - next.yDegrees) >= LEVEL_READING_EPSILON_DEGREES
     }
 
     private companion object {
-        const val FILTER_ALPHA = 0.18f
-        const val LEVEL_READING_MAX_INTERVAL_MILLIS = 80L
         const val LEVEL_READING_EPSILON_DEGREES = 0.05f
     }
 }

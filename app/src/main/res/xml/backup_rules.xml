@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Legacy Auto Backup rules (API <= 30). Everything is backed up by default; we only exclude the
+  per-device level calibration, which is specific to this watch's accelerometer bias and must not
+  be restored onto a different device.
+-->
+<full-backup-content>
+    <exclude
+        domain="sharedpref"
+        path="toolsftw_calibration.xml" />
+</full-backup-content>

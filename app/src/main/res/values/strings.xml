@@ -9,6 +9,10 @@
     <string name="compass_mode_true_north">TRUE NORTH</string>
     <string name="compass_mode_magnetic_no_fix">MAGNETIC · NO FIX</string>
     <string name="compass_mode_magnetic">MAGNETIC</string>
+    <string name="action_toggle_true_north">Toggle true north</string>
+    <string name="action_toggle_altitude_unit">Toggle altitude unit</string>
+    <string name="action_set_level_zero">Set level zero</string>
+    <string name="action_reset_level_zero">Reset level zero</string>
 
     <!-- Altitude readout (%1$d is the rounded altitude) -->
     <string name="altitude_meters">%1$d m ASL</string>
@@ -27,6 +31,6 @@
     <string name="help_low_accuracy_title">Low accuracy</string>
     <string name="help_low_accuracy_body">When the magnetic sensor\'s accuracy is low, a ≈ symbol appears before the heading value.\n\nTo recalibrate, move the watch through a figure-eight motion, away from any metal objects.\n\n</string>
     <string name="help_developer_title">Developer</string>
-    <!-- %1$s is the app name, %2$s is the build date/time -->
-    <string name="help_developer_body">%1$s is developed by\n\nHockWoo Tan\ntanh.app\n\nBuilt %2$s\n\n</string>
+    <!-- %1$s is the app name, %2$s is the short git commit hash of the build -->
+    <string name="help_developer_body">%1$s is developed by\n\nHockWoo Tan\ntanh.app\n\nBuild %2$s\n\n</string>
 </resources>

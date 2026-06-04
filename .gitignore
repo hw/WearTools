@@ -6,6 +6,11 @@
 # Local Android SDK configuration
 local.properties
 
+# Local release signing credentials
+keystore.properties
+*.jks
+*.keystore
+
 # Android Studio and IntelliJ local state
 *.iml
 .idea/caches/

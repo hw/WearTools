@@ -1,4 +1,4 @@
-package app.tanh.tools_ftw.presentation
+package app.tanh.toolsftw.presentation
 
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -21,17 +21,16 @@ import androidx.wear.compose.material3.AppScaffold
 import androidx.wear.compose.material3.HorizontalPagerScaffold
 import androidx.wear.compose.material3.PagerScaffoldDefaults
 import androidx.wear.compose.material3.TimeText
-import app.tanh.tools_ftw.location.LOCATION_PERMISSIONS
-import app.tanh.tools_ftw.location.hasLocationPermission
-import app.tanh.tools_ftw.settings.AppPreferences
-import app.tanh.tools_ftw.settings.Tool
+import app.tanh.toolsftw.location.LOCATION_PERMISSIONS
+import app.tanh.toolsftw.location.hasLocationPermission
+import app.tanh.toolsftw.settings.AppPreferences
+import app.tanh.toolsftw.settings.Tool
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.distinctUntilChanged
 
 @Composable
-fun ToolsFtwApp() {
+fun ToolsFtwApp(preferences: AppPreferences) {
     val context = LocalContext.current
-    val preferences = remember { AppPreferences(context) }
     val initialPage =
         when (preferences.lastTool) {
             Tool.COMPASS -> COMPASS_PAGE
@@ -46,11 +45,12 @@ fun ToolsFtwApp() {
             permissionRefresh++
         }
 
-    if (initialPage == HELP_PAGE) {
-        LaunchedEffect(Unit) {
-            delay(HELP_LOADING_TIMEOUT_MS)
-            isLoading = false
-        }
+    // Dismiss the loading overlay after a fallback timeout even if no first sensor reading
+    // arrives (e.g. a registered sensor that never delivers an event), so it can't hang. The
+    // help page has no sensor to wait on, so it uses a much shorter timeout.
+    LaunchedEffect(Unit) {
+        delay(if (initialPage == HELP_PAGE) HELP_LOADING_TIMEOUT_MS else SENSOR_LOADING_TIMEOUT_MS)
+        isLoading = false
     }
 
     LaunchedEffect(pagerState) {
@@ -122,3 +122,4 @@ private const val LEVEL_PAGE = 1
 private const val HELP_PAGE = 2
 private const val PAGE_COUNT = 3
 private const val HELP_LOADING_TIMEOUT_MS = 400L
+private const val SENSOR_LOADING_TIMEOUT_MS = 2_500L

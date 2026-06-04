@@ -1,4 +1,4 @@
-package app.tanh.tools_ftw.settings
+package app.tanh.toolsftw.settings
 
 import android.content.Context
 import androidx.core.content.edit
@@ -15,7 +15,13 @@ enum class AltitudeUnit {
 
 class AppPreferences(context: Context) {
     private val preferences =
-        context.getSharedPreferences("tools_ftw_preferences", Context.MODE_PRIVATE)
+        context.getSharedPreferences("toolsftw_preferences", Context.MODE_PRIVATE)
+
+    // Per-device accelerometer calibration lives in its own file so it can be excluded from backup
+    // (see res/xml/backup_rules.xml and data_extraction_rules.xml). The zero offset is specific to
+    // this watch's sensor bias and must not be restored onto a different device.
+    private val calibrationPreferences =
+        context.getSharedPreferences("toolsftw_calibration", Context.MODE_PRIVATE)
 
     /** The last tool the user opened, or null if none has been saved yet (fresh install). */
     var lastTool: Tool?
@@ -39,15 +45,15 @@ class AppPreferences(context: Context) {
         set(value) = preferences.edit { putString(KEY_ALTITUDE_UNIT, value.name) }
 
     var levelZeroX: Float
-        get() = preferences.getFloat(KEY_LEVEL_ZERO_X, 0f)
-        set(value) = preferences.edit { putFloat(KEY_LEVEL_ZERO_X, value) }
+        get() = calibrationPreferences.getFloat(KEY_LEVEL_ZERO_X, 0f)
+        set(value) = calibrationPreferences.edit { putFloat(KEY_LEVEL_ZERO_X, value) }
 
     var levelZeroY: Float
-        get() = preferences.getFloat(KEY_LEVEL_ZERO_Y, 0f)
-        set(value) = preferences.edit { putFloat(KEY_LEVEL_ZERO_Y, value) }
+        get() = calibrationPreferences.getFloat(KEY_LEVEL_ZERO_Y, 0f)
+        set(value) = calibrationPreferences.edit { putFloat(KEY_LEVEL_ZERO_Y, value) }
 
     fun resetLevelZero() {
-        preferences.edit {
+        calibrationPreferences.edit {
             remove(KEY_LEVEL_ZERO_X)
             remove(KEY_LEVEL_ZERO_Y)
         }

@@ -1,4 +1,6 @@
-package app.tanh.tools_ftw.sensor
+package app.tanh.toolsftw.sensor
+
+import kotlin.math.abs
 
 data class Vector3(
     val x: Float,
@@ -12,7 +14,7 @@ data class LevelReading(
     val available: Boolean = true,
 ) {
     val isCentered: Boolean
-        get() = available && kotlin.math.abs(xDegrees) <= 1f && kotlin.math.abs(yDegrees) <= 1f
+        get() = available && abs(xDegrees) <= 1f && abs(yDegrees) <= 1f
 }
 
 enum class NorthMode {

@@ -81,8 +81,32 @@ To install the debug build on a connected watch:
 ./gradlew :app:installDebug
 ```
 
+## Release Signing
+
+Release builds are signed when all signing credentials are available. Provide them through a
+git-ignored `keystore.properties` file at the project root:
+
+```properties
+storeFile=release-keystore.jks
+storePassword=...
+keyAlias=...
+keyPassword=...
+```
+
+The `storeFile` path is resolved relative to the project root. Alternatively, set these environment
+variables:
+
+```bash
+RELEASE_STORE_FILE=/path/to/release-keystore.jks
+RELEASE_STORE_PASSWORD=...
+RELEASE_KEY_ALIAS=...
+RELEASE_KEY_PASSWORD=...
+```
+
+If credentials are absent, `assembleRelease` still builds an unsigned release APK.
+
 ## Package
 
 ```text
-app.tanh.toolsFtw
+app.tanh.toolsftw
 ```

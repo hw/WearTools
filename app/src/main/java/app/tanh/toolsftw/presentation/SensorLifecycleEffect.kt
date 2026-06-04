@@ -1,4 +1,4 @@
-package app.tanh.tools_ftw.presentation
+package app.tanh.toolsftw.presentation
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -22,19 +22,30 @@ fun SensorLifecycleEffect(
 ) {
     val lifecycle = LocalLifecycleOwner.current.lifecycle
     DisposableEffect(lifecycle, *keys) {
+        var started = false
+        fun start() {
+            if (started) return
+            started = true
+            onStart()
+        }
+        fun stop() {
+            if (!started) return
+            started = false
+            onStop()
+        }
         val observer =
             LifecycleEventObserver { _, event ->
                 when (event) {
-                    Lifecycle.Event.ON_START -> onStart()
-                    Lifecycle.Event.ON_STOP -> onStop()
+                    Lifecycle.Event.ON_START -> start()
+                    Lifecycle.Event.ON_STOP -> stop()
                     else -> Unit
                 }
             }
         lifecycle.addObserver(observer)
-        if (lifecycle.currentState.isAtLeast(Lifecycle.State.STARTED)) onStart()
+        if (lifecycle.currentState.isAtLeast(Lifecycle.State.STARTED)) start()
         onDispose {
             lifecycle.removeObserver(observer)
-            onStop()
+            stop()
         }
     }
 }

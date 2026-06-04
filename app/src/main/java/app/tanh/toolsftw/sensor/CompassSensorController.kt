@@ -1,4 +1,4 @@
-package app.tanh.tools_ftw.sensor
+package app.tanh.toolsftw.sensor
 
 import android.content.Context
 import android.hardware.Sensor
@@ -31,19 +31,22 @@ class CompassSensorController(
     fun start() {
         lastPublishedReading = null
         lastPublishedAtMillis = 0L
+        gravity = null
+        geomagnetic = null
+        accuracy = null
         when {
             rotationVector != null -> {
-                sensorManager.registerListener(this, rotationVector, SensorManager.SENSOR_DELAY_UI)
+                if (!sensorManager.registerListener(this, rotationVector, SensorManager.SENSOR_DELAY_UI)) {
+                    startFallbackSensors()
+                    return
+                }
                 // Magnetometer is only needed here to surface accuracy (the low-accuracy
                 // indicator) via onAccuracyChanged, so sample it slowly to save power.
                 magneticField?.let {
                     sensorManager.registerListener(this, it, SensorManager.SENSOR_DELAY_NORMAL)
                 }
             }
-            accelerometer != null && magneticField != null -> {
-                sensorManager.registerListener(this, accelerometer, SensorManager.SENSOR_DELAY_UI)
-                sensorManager.registerListener(this, magneticField, SensorManager.SENSOR_DELAY_UI)
-            }
+            accelerometer != null && magneticField != null -> startFallbackSensors()
             else -> onReading(CompassReading(available = false))
         }
     }
@@ -84,6 +87,21 @@ class CompassSensorController(
         val currentGeomagnetic = geomagnetic ?: return
         if (SensorManager.getRotationMatrix(rotationMatrix, null, currentGravity, currentGeomagnetic)) {
             publishHeading()
+        }
+    }
+
+    private fun startFallbackSensors() {
+        if (accelerometer == null || magneticField == null) {
+            onReading(CompassReading(available = false))
+            return
+        }
+        val accelerometerRegistered =
+            sensorManager.registerListener(this, accelerometer, SensorManager.SENSOR_DELAY_UI)
+        val magneticFieldRegistered =
+            sensorManager.registerListener(this, magneticField, SensorManager.SENSOR_DELAY_UI)
+        if (!accelerometerRegistered || !magneticFieldRegistered) {
+            sensorManager.unregisterListener(this)
+            onReading(CompassReading(available = false))
         }
     }
 
@@ -134,7 +152,7 @@ class CompassSensorController(
         if (
             previous.lowAccuracy != nextLowAccuracy ||
                 previousTrueNorthEnabled != nextTrueNorthEnabled ||
-                elapsedMillis >= COMPASS_READING_MAX_INTERVAL_MILLIS
+                elapsedMillis >= SensorTuning.PUBLISH_MAX_INTERVAL_MILLIS
         ) {
             return true
         }
@@ -157,14 +175,12 @@ class CompassSensorController(
     private fun smoothed(values: FloatArray, previous: FloatArray?): FloatArray {
         if (previous == null) return values.copyOf()
         for (index in previous.indices) {
-            previous[index] += FILTER_ALPHA * (values[index] - previous[index])
+            previous[index] += SensorTuning.FILTER_ALPHA * (values[index] - previous[index])
         }
         return previous
     }
 
     private companion object {
-        const val FILTER_ALPHA = 0.18f
-        const val COMPASS_READING_MAX_INTERVAL_MILLIS = 80L
         const val COMPASS_HEADING_EPSILON_DEGREES = 0.5f
     }
 }
