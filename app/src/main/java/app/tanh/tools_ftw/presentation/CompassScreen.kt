@@ -1,4 +1,4 @@
-package app.tanh.toolsFtw.presentation
+package app.tanh.tools_ftw.presentation
 
 import android.graphics.Bitmap
 import android.graphics.Canvas as AndroidCanvas
@@ -34,15 +34,15 @@ import androidx.compose.ui.unit.dp
 import androidx.wear.compose.material3.MaterialTheme
 import androidx.wear.compose.material3.Text
 import androidx.wear.compose.ui.tooling.preview.WearPreviewDevices
-import app.tanh.toolsFtw.R
-import app.tanh.toolsFtw.location.TrueNorthProvider
-import app.tanh.toolsFtw.presentation.theme.ToolsFtwTheme
-import app.tanh.toolsFtw.sensor.CompassReading
-import app.tanh.toolsFtw.sensor.CompassSensorController
-import app.tanh.toolsFtw.sensor.NorthMode
-import app.tanh.toolsFtw.sensor.SensorMath
-import app.tanh.toolsFtw.settings.AppPreferences
-import app.tanh.toolsFtw.settings.AltitudeUnit
+import app.tanh.tools_ftw.R
+import app.tanh.tools_ftw.location.TrueNorthProvider
+import app.tanh.tools_ftw.presentation.theme.ToolsFtwTheme
+import app.tanh.tools_ftw.sensor.CompassReading
+import app.tanh.tools_ftw.sensor.CompassSensorController
+import app.tanh.tools_ftw.sensor.NorthMode
+import app.tanh.tools_ftw.sensor.SensorMath
+import app.tanh.tools_ftw.settings.AppPreferences
+import app.tanh.tools_ftw.settings.AltitudeUnit
 import java.util.Locale
 import kotlin.math.cos
 import kotlin.math.roundToInt

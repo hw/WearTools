@@ -1,10 +1,10 @@
-package app.tanh.toolsFtw.presentation
+package app.tanh.tools_ftw.presentation
 
 import android.os.Bundle
 import android.view.WindowManager
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import app.tanh.toolsFtw.presentation.theme.ToolsFtwTheme
+import app.tanh.tools_ftw.presentation.theme.ToolsFtwTheme
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {

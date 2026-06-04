@@ -12,7 +12,7 @@ val buildDateTime =
         .format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm 'SGT'"))
 
 android {
-    namespace = "app.tanh.toolsFtw"
+    namespace = "app.tanh.tools_ftw"
     compileSdk {
         version = release(36) {
             minorApiLevel = 1

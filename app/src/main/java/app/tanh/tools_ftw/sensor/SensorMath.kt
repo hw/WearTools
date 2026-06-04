@@ -1,4 +1,4 @@
-package app.tanh.toolsFtw.sensor
+package app.tanh.tools_ftw.sensor
 
 import kotlin.math.atan2
 import kotlin.math.roundToInt

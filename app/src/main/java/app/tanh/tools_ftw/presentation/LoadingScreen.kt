@@ -1,4 +1,4 @@
-package app.tanh.toolsFtw.presentation
+package app.tanh.tools_ftw.presentation
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -15,8 +15,8 @@ import androidx.wear.compose.material3.CircularProgressIndicator
 import androidx.wear.compose.material3.MaterialTheme
 import androidx.wear.compose.material3.Text
 import androidx.wear.compose.ui.tooling.preview.WearPreviewDevices
-import app.tanh.toolsFtw.R
-import app.tanh.toolsFtw.presentation.theme.ToolsFtwTheme
+import app.tanh.tools_ftw.R
+import app.tanh.tools_ftw.presentation.theme.ToolsFtwTheme
 
 @Composable
 fun LoadingScreen(modifier: Modifier = Modifier) {

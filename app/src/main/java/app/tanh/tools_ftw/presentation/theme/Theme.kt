@@ -1,4 +1,4 @@
-package app.tanh.toolsFtw.presentation.theme
+package app.tanh.tools_ftw.presentation.theme
 
 import androidx.compose.runtime.Composable
 import androidx.wear.compose.material3.MaterialTheme

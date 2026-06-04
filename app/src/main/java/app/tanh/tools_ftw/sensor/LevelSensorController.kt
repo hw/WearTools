@@ -1,4 +1,4 @@
-package app.tanh.toolsFtw.sensor
+package app.tanh.tools_ftw.sensor
 
 import android.content.Context
 import android.hardware.Sensor

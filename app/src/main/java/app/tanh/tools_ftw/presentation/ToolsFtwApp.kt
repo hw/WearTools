@@ -1,4 +1,4 @@
-package app.tanh.toolsFtw.presentation
+package app.tanh.tools_ftw.presentation
 
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -21,10 +21,10 @@ import androidx.wear.compose.material3.AppScaffold
 import androidx.wear.compose.material3.HorizontalPagerScaffold
 import androidx.wear.compose.material3.PagerScaffoldDefaults
 import androidx.wear.compose.material3.TimeText
-import app.tanh.toolsFtw.location.LOCATION_PERMISSIONS
-import app.tanh.toolsFtw.location.hasLocationPermission
-import app.tanh.toolsFtw.settings.AppPreferences
-import app.tanh.toolsFtw.settings.Tool
+import app.tanh.tools_ftw.location.LOCATION_PERMISSIONS
+import app.tanh.tools_ftw.location.hasLocationPermission
+import app.tanh.tools_ftw.settings.AppPreferences
+import app.tanh.tools_ftw.settings.Tool
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.distinctUntilChanged
 

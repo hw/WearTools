@@ -1,4 +1,4 @@
-package app.tanh.toolsFtw.presentation
+package app.tanh.tools_ftw.presentation
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect

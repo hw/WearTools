@@ -1,4 +1,4 @@
-package app.tanh.toolsFtw.settings
+package app.tanh.tools_ftw.settings
 
 import android.content.Context
 import androidx.core.content.edit
